@@ -597,33 +597,35 @@ class IntelRenderer(OpenCLRenderer):
 
 
 class MetalRenderer(CStyleLanguage):
+    print("<eggachecat>MetalRenderer")
     device = "METAL"
     shared_max = 32768
-    tensor_cores = [
-        TensorCore(
-            dims=(8, 8, 8),
-            threads=32,
-            elements_per_thread=(2, 2, 2),
-            dtype_in=di,
-            dtype_out=do,
-            opts=("u0", "l0", "l1", "l1", "l0", "l1"),
-            swizzle=(((6, 1, 2, 7, 4), (8, 0, 3, 5)), ((0, 5, 6, 3, 7), (1, 2, 4, 8))),
-        )
-        for di, do in [
-            (dtypes.float, dtypes.float),
-            (dtypes.half, dtypes.float),
-            (dtypes.half, dtypes.half),
-            (dtypes.bfloat16, dtypes.float),
-            (dtypes.bfloat16, dtypes.bfloat16),
-        ]
-    ]
+    # tensor_cores = [
+    #     TensorCore(
+    #         dims=(8, 8, 8),
+    #         threads=32,
+    #         elements_per_thread=(2, 2, 2),
+    #         dtype_in=di,
+    #         dtype_out=do,
+    #         opts=("u0", "l0", "l1", "l1", "l0", "l1"),
+    #         swizzle=(((6, 1, 2, 7, 4), (8, 0, 3, 5)), ((0, 5, 6, 3, 7), (1, 2, 4, 8))),
+    #     )
+    #     for di, do in [
+    #         (dtypes.float, dtypes.float),
+    #         (dtypes.half, dtypes.float),
+    #         (dtypes.half, dtypes.half),
+    #         (dtypes.bfloat16, dtypes.float),
+    #         (dtypes.bfloat16, dtypes.bfloat16),
+    #     ]
+    # ]
 
     def __init__(self):
-        self.tensor_cores = (
-            MetalRenderer.tensor_cores
-            if hasattr(os, "uname") and os.uname().machine == "arm64"
-            else []
-        )
+        pass
+        # self.tensor_cores = (
+        #     MetalRenderer.tensor_cores
+        #     if hasattr(os, "uname") and os.uname().machine == "arm64"
+        #     else []
+        # )
 
     # language options
     kernel_prefix = "kernel "
@@ -650,6 +652,7 @@ class MetalRenderer(CStyleLanguage):
     }
 
     # upcast to float32 all the ops that don't support bfloat16
+    print("<eggachecat>disable extra_matcher")
     extra_matcher = (
         PatternMatcher(
             [
@@ -673,7 +676,7 @@ class MetalRenderer(CStyleLanguage):
         )
         + extra_pm
     )
-
+    print("<eggachecat>disable extra string_rewrite")
     string_rewrite = (
         PatternMatcher(
             [

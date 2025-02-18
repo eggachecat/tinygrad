@@ -76,6 +76,7 @@ class _Device:
             "PYTHON",
         ], f"can only open device {ix} from parent, not {cpn}"
         x = ix.split(":")[0].upper()
+        print(f"<eggachecat>Device[{ix}] = tinygrad.runtime.ops_{x.lower()}")
         ret = [
             cls
             for cname, cls in inspect.getmembers(

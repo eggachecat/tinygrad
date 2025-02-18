@@ -124,7 +124,7 @@ class Kernel:
             self.ast = ast
 
         self.opts = opts if opts is not None else Device[Device.DEFAULT].renderer
-        print("self.opts", self.opts)
+        print("<eggachecat>self.opts", self.opts)
         # verify AST matches the spec
         if __debug__:
             type_verify(list(self.ast.toposort), shape_spec)
