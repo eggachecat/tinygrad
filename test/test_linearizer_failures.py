@@ -1259,33 +1259,85 @@ class TestLinearizerFailures(unittest.TestCase):
     ast = UOp(Ops.SINK, dtypes.void, arg=None, src=(
       UOp(Ops.STORE, dtypes.void, arg=None, src=(
         UOp(Ops.DEFINE_GLOBAL, dtypes.uchar.ptr(), arg=0, src=()),
-        UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(1024, 1, 1), strides=(1, 0, 0), offset=0, mask=None, contiguous=True),)), src=()),
+        UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(1, 1, 1), strides=(1, 0, 0), offset=0, mask=None, contiguous=True),)), src=()),
         UOp(Ops.REDUCE_AXIS, dtypes.uchar, arg=(Ops.ADD, (1,)), src=(
           UOp(Ops.MUL, dtypes.uchar, arg=None, src=(
             UOp(Ops.LOAD, dtypes.uchar, arg=None, src=(
               UOp(Ops.DEFINE_GLOBAL, dtypes.uchar.ptr(), arg=1, src=()),
-              UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(1024, 50000, 1), strides=(0, 1, 0), offset=0, mask=None, contiguous=False),)), src=()),)),
+              UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(1, (1*2), 1), strides=(0, 1, 0), offset=0, mask=None, contiguous=False),)), src=()),)),
             UOp(Ops.CAST, dtypes.uchar, arg=None, src=(
               UOp(Ops.CMPNE, dtypes.bool, arg=None, src=(
                 UOp(Ops.CMPNE, dtypes.bool, arg=None, src=(
                   UOp(Ops.LOAD, dtypes.int, arg=None, src=(
                     UOp(Ops.DEFINE_GLOBAL, dtypes.int.ptr(), arg=2, src=()),
-                    UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(1024, 50000, 1), strides=(1, 0, 0), offset=0, mask=None, contiguous=False),)), src=()),)),
+                    UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(1, (1*2), 1), strides=(1, 0, 0), offset=0, mask=None, contiguous=False),)), src=()),)),
                   UOp(Ops.ADD, dtypes.int, arg=None, src=(
                     UOp(Ops.REDUCE_AXIS, dtypes.int, arg=(Ops.ADD, (2,)), src=(
                       UOp(Ops.WHERE, dtypes.int, arg=None, src=(
                         UOp(Ops.VALID, dtypes.bool, arg=None, src=(
-                          UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(50001, 99999), strides=(0, 0), offset=0, mask=((0, 50001), (49999, 99999)), contiguous=False), View(shape=(1024, 50000, 50000), strides=(0, 1, 100000), offset=0, mask=None, contiguous=False))), src=()),)),
+                          UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=((1*2)+1, (1*2)*2-1), strides=(0, 0), offset=0, mask=((0, (1*2)+1), ((1*2)-1, (1*2)*2-1)), contiguous=False), View(shape=(1, (1*2), (1*2)), strides=(0, 1, (1*2)*2), offset=0, mask=None, contiguous=False))), src=()),)),
                         UOp(Ops.CONST, dtypes.int, arg=1, src=(
-                          x20:=UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(1024, 50000, 50000), strides=(0, 0, 0), offset=0, mask=None, contiguous=False),)), src=()),)),
+                          x20:=UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(1, (1*2), (1*2)), strides=(0, 0, 0), offset=0, mask=None, contiguous=False),)), src=()),)),
                         UOp(Ops.CONST, dtypes.int, arg=0, src=(
                            x20,)),)),)),
                     UOp(Ops.CONST, dtypes.int, arg=-1, src=(
-                      x23:=UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(1024, 50000, 1), strides=(0, 0, 0), offset=0, mask=None, contiguous=False),)), src=()),)),)),)),
+                      x23:=UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(1, (1*2), 1), strides=(0, 0, 0), offset=0, mask=None, contiguous=False),)), src=()),)),)),)),
                 UOp(Ops.CONST, dtypes.bool, arg=True, src=(
                    x23,)),)),)),)),)),)),))
-    opts = [Opt(op=OptOps.GROUPTOP, axis=1, arg=16)]
+    opts = [
+      Opt(op=OptOps.GROUPTOP, axis=1, arg=2)
+    ]
     helper_test_lin(Kernel(ast, opts=Device[Device.DEFAULT].renderer), opts=opts, failed_platforms=["AMD", "GPU", "METAL", "NV", "CUDA"])
+    return
+
+
+    ast = UOp(Ops.SINK, dtypes.void, arg=None, src=(
+      UOp(Ops.STORE, dtypes.void, arg=None, src=(
+        UOp(Ops.DEFINE_GLOBAL, dtypes.uchar.ptr(), arg=0, src=()),
+        UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(3, 5, 1, 9), strides=(1, 1, 1, 1), offset=0, mask=None, contiguous=True),)), src=()),
+        UOp(Ops.REDUCE_AXIS, dtypes.int, arg=(Ops.ADD, (2,)), src=(
+          UOp(Ops.ADD, dtypes.uchar, arg=None, src=(
+            UOp(Ops.LOAD, dtypes.uchar, arg=None, src=(
+              UOp(Ops.DEFINE_GLOBAL, dtypes.uchar.ptr(), arg=1, src=()),
+              UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(3, 5, 8, 9), strides=(1, 1, 1, 1), offset=0, mask=None, contiguous=False),)), src=()),
+            )),
+            UOp(Ops.LOAD, dtypes.uchar, arg=None, src=(
+              UOp(Ops.DEFINE_GLOBAL, dtypes.uchar.ptr(), arg=2, src=()),
+              UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(3, 5, 8, 9), strides=(1, 1, 1, 1), offset=0, mask=None, contiguous=False),)), src=()),
+            )),
+          )),
+        )),
+      )),
+    ))
+
+    opts = [
+      Opt(op=OptOps.GROUPTOP, axis=1, arg=2)
+    ]
+
+    helper_test_lin(Kernel(ast, opts=Device[Device.DEFAULT].renderer), opts=opts, failed_platforms=["AMD", "GPU", "METAL", "NV", "CUDA"])
+
+    # ast = UOp(Ops.SINK, dtypes.void, arg=None, src=(
+    #   UOp(Ops.STORE, dtypes.void, arg=None, src=(
+    #     UOp(Ops.DEFINE_GLOBAL, dtypes.int.ptr(), arg=0, src=()),
+    #     UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(1, 1, 2), strides=(2, 2, 1), offset=0, mask=None, contiguous=True),)), src=()),
+    #     UOp(Ops.ADD, dtypes.int, arg=None, src=(
+    #       UOp(Ops.REDUCE_AXIS, dtypes.int, arg=(Ops.ADD, (2,)), src=(
+    #         UOp(Ops.WHERE, dtypes.int, arg=None, src=(
+    #           UOp(Ops.VALID, dtypes.bool, arg=None, src=(
+    #             UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=((1*2)+1, (1*2)*2-1), strides=(0, 0), offset=0, mask=((0, (1*2)+1), ((1*2)-1, (1*2)*2-1)), contiguous=False), View(shape=(1, (1*2), (1*2)), strides=(0, 1, (1*2)*2), offset=0, mask=None, contiguous=False))), src=()),
+    #           )),
+    #           UOp(Ops.CONST, dtypes.int, arg=1, src=(
+    #             x20:=UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(1, (1*2), (1*2)), strides=(0, 0, 0), offset=0, mask=None, contiguous=False),)), src=()),)),
+    #           UOp(Ops.CONST, dtypes.int, arg=0, src=(
+    #               x20,)),
+    #         )),
+    #       )),
+    #       UOp(Ops.CONST, dtypes.int, arg=-1, src=(
+    #         x23:=UOp(Ops.VIEW, dtypes.void, arg=ShapeTracker(views=(View(shape=(1, (1*2), 1), strides=(0, 0, 0), offset=0, mask=None, contiguous=False),)), src=()),)),
+    #     ))
+    #   )),
+    # ))
+
 
   @unittest.skipIf(CI and Device.DEFAULT in {"METAL"}, "hangs metal gpu CI")
   def test_failure_54(self):

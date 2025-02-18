@@ -135,13 +135,28 @@ kernel_spec = buffer_spec+PatternMatcher([
 
 def verify_sink_dims(sink:UOp):
   shape_dims = [sorted(dedup(dims)) for dims in zip(*[x.shape for x in sink.toposort if x.op is not Ops.SINK and x.st is not None])]
+  for x in sink.toposort:
+    if x.op is not Ops.SINK and x.st is not None:
+      print(x.op, x.shape)
+
+
+  print('dims', list(zip(*[(x.shape, x.op) for x in sink.toposort if x.op is not Ops.SINK and x.st is not None])))
+  print('shape_dims', shape_dims)
+  print('[x.st_arg.size for x in sink.src])', [x.st_arg.size for x in sink.src])
+  print(f"{all_same([x.st_arg.size for x in sink.src])=}")
+
+  print(f'{[len(x) == 1 or (len(x) == 2 and x[0] == 1) for x in shape_dims]=}')
+
   return all_same([x.st_arg.size for x in sink.src]) and all(len(x) == 1 or (len(x) == 2 and x[0] == 1) for x in shape_dims)
+
+def verify_damn(root):
+  return all_same([x.shape for x in root.src if x.st is not None])
 
 shape_spec = PatternMatcher([
   # shapes must have either 1 or n in each dimension
   (UPat(Ops.SINK, src=UPat(Ops.STORE), allow_any_len=True, name="sink"), verify_sink_dims),
   # all parent UOps must have the same shape
-  (UPat(GroupOp.All-{Ops.SINK}, name="root"), lambda root: all_same([x.shape for x in root.src if x.st is not None])),
+  # (UPat(GroupOp.All-{Ops.SINK}, name="root"), lambda root: verify_damn),
 ])
 
 # ***** uop helpers *****

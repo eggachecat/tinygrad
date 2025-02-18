@@ -35,6 +35,7 @@ class Opt:
   arg: Optional[int | tuple] = None
   def __repr__(self): return f"Opt(op={self.op}, axis={self.axis}, arg={self.arg})"
   def real_axis(self, k:Kernel):
+    print(f"real_axis: {k.first_reduce=} {k.group_for_reduces=} {self.axis=}")
     if self.axis is None: return -1
     if self.op is OptOps.UNROLL: return k.first_reduce+self.axis
     if self.op in {OptOps.GROUP, OptOps.GROUPTOP}: return k.first_reduce+k.group_for_reduces+self.axis
@@ -130,6 +131,7 @@ class Kernel:
 
   @property
   def first_reduce(self) -> int:
+    print(f"{list(zip(self.sts[0].shape[:self.first_upcast]+(0,), self.full_shape[:self.first_upcast]+(1,)))=}")
     return [resolve(x!=y) for x,y in zip(self.sts[0].shape[:self.first_upcast]+(0,), self.full_shape[:self.first_upcast]+(1,))].index(True)
 
   @property
@@ -366,7 +368,8 @@ class Kernel:
       return
 
     axis = opt.real_axis(self)
-    check(axis < len(self.full_shape), "invalid axis")
+    check(axis < len(self.full_shape), f"invalid axis {axis} for {self.full_shape=}")
+    print(f"axis {axis} for {self.full_shape=}")
 
     if opt.op is OptOps.SWAP: amt = cast(int, opt.arg)  # arg is an axis in the SWAPs
     elif opt.arg is not None:
