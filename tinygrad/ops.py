@@ -1919,14 +1919,17 @@ class RewriteContext:
         print(f"<eggachecat>AT {id(n)=}, {trace=}")
 
         if trace is None:
-            trace = []
+            trace = {}
         
         if id(n) in trace:
+            trace[id(n)] += 1
+        else:
+            trace[id(n)] = 1
+
+        if trace[id(n)] > 1000:
             print(f"hit infinite loop!")
             import sys
             sys.exit(1)
-
-        trace.append(id(n))
 
 
 
