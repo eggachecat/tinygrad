@@ -100,14 +100,17 @@ class _Device:
 
     @functools.cached_property
     def DEFAULT(self) -> str:
+        # return "CLANG"
         if from_env := next(
             (d for d in self._devices if d not in ["DISK", "NPY"] and getenv(d) == 1),
             None,
         ):
+            print(f"<eggachecat>Device.DEFAULT = {from_env=}")
             return from_env
         try:
             device = next(self.get_available_devices())
             os.environ[device] = "1"  # we set this in environment for spawned children
+            print(f"<eggachecat>Device.DEFAULT = {device=}")
             return device
         except StopIteration as exc:
             raise RuntimeError("no usable devices") from exc

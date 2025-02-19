@@ -25,25 +25,28 @@ def helper_test_lin(lin: Kernel, opts, failed_platforms, rtol=1e-2, atol=1e-2):
         return
 
     for opt in opts:
-        try:
-            lin.apply_opt(opt)
-        except KernelOptError:
-            # it's considered fixed if we invalidated the opts
-            assert (
-                Device.DEFAULT not in failed_platforms
-            ), f"unexpected success on {Device.DEFAULT}"
-            return
+        lin.apply_opt(opt)
+
+        # try:
+        # except KernelOptError:
+        #     # it's considered fixed if we invalidated the opts
+        #     assert (
+        #         Device.DEFAULT not in failed_platforms
+        #     ), f"unexpected success on {Device.DEFAULT}"
+        #     return
 
     compare_result = compare_linearizer(lin, rtol=rtol, atol=atol)
-    if compare_result[0] in ["PASS", "KernelOptError"]:
-        # it's considered fixed if we invalidated the opts
-        assert (
-            Device.DEFAULT not in failed_platforms
-        ), f"unexpected success on {Device.DEFAULT}"
-    else:
-        assert (
-            Device.DEFAULT in failed_platforms
-        ), f"failed on {Device.DEFAULT} with {compare_result[0]}"
+    print("<eggachecat>", compare_result)
+    assert compare_result[0] == "PASS"
+    # if compare_result[0] in ["PASS", "KernelOptError"]:
+    #     # it's considered fixed if we invalidated the opts
+    #     assert (
+    #         Device.DEFAULT not in failed_platforms
+    #     ), f"unexpected success on {Device.DEFAULT}"
+    # else:
+    #     assert (
+    #         Device.DEFAULT in failed_platforms
+    #     ), f"failed on {Device.DEFAULT} with {compare_result[0]}"
     return lin
 
 
@@ -14043,7 +14046,9 @@ class TestLinearizerFailures(unittest.TestCase):
                 ),
             ),
         )
-        opts = [Opt(op=OptOps.GROUPTOP, axis=1, arg=2)]
+        opts = [
+            Opt(op=OptOps.GROUPTOP, axis=1, arg=2)
+        ]
         helper_test_lin(
             Kernel(ast, opts=Device[Device.DEFAULT].renderer),
             opts=opts,

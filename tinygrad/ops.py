@@ -1914,18 +1914,34 @@ class RewriteContext:
         self.replace[n] = ret = n if new_n is None else self.top_down_rewrite(new_n)
         return ret
 
-    def bottom_up_rewrite(self, n: UOp) -> UOp:
+    def bottom_up_rewrite(self, n: UOp, trace=None) -> UOp:
+
+        print(f"<eggachecat>AT {id(n)=}, {trace=}")
+
+        if trace is None:
+            trace = []
+        
+        if id(n) in trace:
+            print(f"hit infinite loop!")
+            import sys
+            sys.exit(1)
+
+        trace.append(id(n))
+
+
+
         if (rn := self.replace.get(n)) is not None:
             return rn
         new_n: UOp | None = n
         while new_n is not None:
             last_n, new_n = new_n, self.pm.rewrite(new_n, self.ctx)
-        new_src = tuple([self.bottom_up_rewrite(x) for x in last_n.src])
+        new_src = tuple([self.bottom_up_rewrite(x, trace) for x in last_n.src])
         self.replace[n] = ret = (
             last_n
             if new_src == last_n.src
             else self.bottom_up_rewrite(
-                UOp(last_n.op, last_n.dtype, new_src, last_n.arg)
+                UOp(last_n.op, last_n.dtype, new_src, last_n.arg),
+                trace
             )
         )
         return ret

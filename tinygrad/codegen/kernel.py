@@ -73,6 +73,7 @@ class KernelOptError(Exception):
 
 def check(cond: bool, msg: str = ""):
     if not cond:
+        print(f"<eggachecat> {msg=}")
         raise KernelOptError(msg)
 
 
@@ -754,10 +755,12 @@ class Kernel:
             self.shift_to(axis, amt, insert_before=self.first_reduce)
             self.local_dims += 1
         elif opt.op in {OptOps.GROUP, OptOps.GROUPTOP}:  # green
+            print(f"<eggachecat>CHECK! {self.opts.has_local=} {self.opts.has_shared=}")
             check(
                 self.opts.has_local and self.opts.has_shared,
                 "target does not support local or shared mem",
             )
+            print(f"<eggachecat>CHECK! {self.first_reduce=} {self.group_for_reduces=} {axis=} {self.first_upcast=}")
             check(
                 self.first_reduce + self.group_for_reduces <= axis < self.first_upcast,
                 "must be reduce axis to group",
