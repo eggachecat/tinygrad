@@ -131,6 +131,7 @@ class Kernel:
             type_verify(list(self.ast.toposort), shape_spec)
 
         self.reduceops = [x for x in self.ast.toposort if x.op is Ops.REDUCE_AXIS]
+        print(f"<eggachecat>{self.reduceops=}")
 
         self.vars: list[Variable] = self.ast.variables()
         # NOTE: this requires a specific order with the [::-1], this is likely a bug
@@ -158,11 +159,16 @@ class Kernel:
             self.sts.append(unwrap(x.src[0].st))
 
         # move all reduce axes to the end
+        print(f"<eggachecat>{self.full_shape=}")
+        print(f"<eggachecat>{self.output_shape=}")
         reduce = list(enumerate(zip(self.full_shape, self.output_shape)))
+        print(f"<eggachecat>{reduce=}")
+
         permute = tuple(
             [i for i, (s, n) in reduce if not resolve(s != n)]
             + [i for i, (s, n) in reduce if resolve(s != n)]
         )
+        print(f"<eggachecat>{permute=}")
         self.reshape_and_permute(None, permute)
 
         # parameters for optimization
@@ -861,6 +867,9 @@ class Kernel:
                 axis
             )  # fix up axes in TC opts if required after simplify_ones()
 
+    print(f"<eggachecat>RETURN")
+
+
     def required_optimizations(self) -> Kernel:
         if isinstance(self.membufs[0].dtype, ImageDType):
             unit_stride_axes_mul_4 = [
@@ -954,11 +963,11 @@ class Kernel:
                         or st.shape[self.first_reduce] == 1
                         for st in self.sts
                     ):
-                        try:  # may fail due to excessive smem usage
-                            self.apply_opt(Opt(OptOps.GROUPTOP, 0, sz))
-                            break
-                        except KernelOptError:
-                            pass
+                        self.apply_opt(Opt(OptOps.GROUPTOP, 0, sz))
+                        # try:  # may fail due to excessive smem usage
+                        #     break
+                        # except KernelOptError:
+                        #     pass
 
         # upcast float4 images
         for buf_index, buf in enumerate(self.bufs):

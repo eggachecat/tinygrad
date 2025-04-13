@@ -1925,15 +1925,19 @@ class RewriteContext:
             _dict = {}
 
         _dict[id(n)] = n
+
+
+        print(f"<eggachecat>AT {id(n)=}, {[_dict[k].op for k in trace]=}")
         
         if id(n) in trace:
             trace[id(n)] += 1
         else:
             trace[id(n)] = 1
 
-        if trace[id(n)] > 100:
+        if trace[id(n)] > 2:
             print(f"hit infinite loop!")
             print(f"<eggachecat>WTF {id(n)=}, {_dict[id(n)]=}")
+            print(f"<eggachecat>WTF {id(n)=}, {[_dict[k].op for k in trace]=}")
             import sys
             sys.exit(1)
 

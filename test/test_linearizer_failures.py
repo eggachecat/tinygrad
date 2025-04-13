@@ -34,7 +34,7 @@ def helper_test_lin(lin: Kernel, opts, failed_platforms, rtol=1e-2, atol=1e-2):
         #         Device.DEFAULT not in failed_platforms
         #     ), f"unexpected success on {Device.DEFAULT}"
         #     return
-
+    
     compare_result = compare_linearizer(lin, rtol=rtol, atol=atol)
     print("<eggachecat>", compare_result)
     assert compare_result[0] == "PASS"
@@ -13716,339 +13716,70 @@ class TestLinearizerFailures(unittest.TestCase):
         )
 
     def test_failure_53(self):
-        # COMPILE_ERROR, val scope issue
-        ast = UOp(
-            Ops.SINK,
-            dtypes.void,
-            arg=None,
-            src=(
-                UOp(
-                    Ops.STORE,
-                    dtypes.void,
-                    arg=None,
-                    src=(
-                        UOp(Ops.DEFINE_GLOBAL, dtypes.uchar.ptr(), arg=0, src=()),
-                        UOp(
-                            Ops.VIEW,
-                            dtypes.void,
-                            arg=ShapeTracker(
-                                views=(
-                                    View(
-                                        shape=(1, 1, 1),
-                                        strides=(1, 0, 0),
-                                        offset=0,
-                                        mask=None,
-                                        contiguous=True,
-                                    ),
-                                )
-                            ),
-                            src=(),
-                        ),
-                        UOp(
-                            Ops.REDUCE_AXIS,
-                            dtypes.uchar,
-                            arg=(Ops.ADD, (1,)),
-                            src=(
-                                UOp(
-                                    Ops.MUL,
-                                    dtypes.uchar,
-                                    arg=None,
-                                    src=(
-                                        UOp(
-                                            Ops.LOAD,
-                                            dtypes.uchar,
-                                            arg=None,
-                                            src=(
-                                                UOp(
-                                                    Ops.DEFINE_GLOBAL,
-                                                    dtypes.uchar.ptr(),
-                                                    arg=1,
-                                                    src=(),
-                                                ),
-                                                UOp(
-                                                    Ops.VIEW,
-                                                    dtypes.void,
-                                                    arg=ShapeTracker(
-                                                        views=(
-                                                            View(
-                                                                shape=(1, (1 * 2), 1),
-                                                                strides=(0, 1, 0),
-                                                                offset=0,
-                                                                mask=None,
-                                                                contiguous=False,
-                                                            ),
-                                                        )
-                                                    ),
-                                                    src=(),
-                                                ),
-                                            ),
-                                        ),
-                                        UOp(
-                                            Ops.CAST,
-                                            dtypes.uchar,
-                                            arg=None,
-                                            src=(
-                                                UOp(
-                                                    Ops.CMPNE,
-                                                    dtypes.bool,
-                                                    arg=None,
-                                                    src=(
-                                                        UOp(
-                                                            Ops.CMPNE,
-                                                            dtypes.bool,
-                                                            arg=None,
-                                                            src=(
-                                                                UOp(
-                                                                    Ops.LOAD,
-                                                                    dtypes.int,
-                                                                    arg=None,
-                                                                    src=(
-                                                                        UOp(
-                                                                            Ops.DEFINE_GLOBAL,
-                                                                            dtypes.int.ptr(),
-                                                                            arg=2,
-                                                                            src=(),
-                                                                        ),
-                                                                        UOp(
-                                                                            Ops.VIEW,
-                                                                            dtypes.void,
-                                                                            arg=ShapeTracker(
-                                                                                views=(
-                                                                                    View(
-                                                                                        shape=(
-                                                                                            1,
-                                                                                            (
-                                                                                                1
-                                                                                                * 2
-                                                                                            ),
-                                                                                            1,
-                                                                                        ),
-                                                                                        strides=(
-                                                                                            1,
-                                                                                            0,
-                                                                                            0,
-                                                                                        ),
-                                                                                        offset=0,
-                                                                                        mask=None,
-                                                                                        contiguous=False,
-                                                                                    ),
-                                                                                )
-                                                                            ),
-                                                                            src=(),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                                UOp(
-                                                                    Ops.ADD,
-                                                                    dtypes.int,
-                                                                    arg=None,
-                                                                    src=(
-                                                                        UOp(
-                                                                            Ops.REDUCE_AXIS,
-                                                                            dtypes.int,
-                                                                            arg=(
-                                                                                Ops.ADD,
-                                                                                (2,),
-                                                                            ),
-                                                                            src=(
-                                                                                UOp(
-                                                                                    Ops.WHERE,
-                                                                                    dtypes.int,
-                                                                                    arg=None,
-                                                                                    src=(
-                                                                                        UOp(
-                                                                                            Ops.VALID,
-                                                                                            dtypes.bool,
-                                                                                            arg=None,
-                                                                                            src=(
-                                                                                                UOp(
-                                                                                                    Ops.VIEW,
-                                                                                                    dtypes.void,
-                                                                                                    arg=ShapeTracker(
-                                                                                                        views=(
-                                                                                                            View(
-                                                                                                                shape=(
-                                                                                                                    (
-                                                                                                                        1
-                                                                                                                        * 2
-                                                                                                                    )
-                                                                                                                    + 1,
-                                                                                                                    (
-                                                                                                                        1
-                                                                                                                        * 2
-                                                                                                                    )
-                                                                                                                    * 2
-                                                                                                                    - 1,
-                                                                                                                ),
-                                                                                                                strides=(
-                                                                                                                    0,
-                                                                                                                    0,
-                                                                                                                ),
-                                                                                                                offset=0,
-                                                                                                                mask=(
-                                                                                                                    (
-                                                                                                                        0,
-                                                                                                                        (
-                                                                                                                            1
-                                                                                                                            * 2
-                                                                                                                        )
-                                                                                                                        + 1,
-                                                                                                                    ),
-                                                                                                                    (
-                                                                                                                        (
-                                                                                                                            1
-                                                                                                                            * 2
-                                                                                                                        )
-                                                                                                                        - 1,
-                                                                                                                        (
-                                                                                                                            1
-                                                                                                                            * 2
-                                                                                                                        )
-                                                                                                                        * 2
-                                                                                                                        - 1,
-                                                                                                                    ),
-                                                                                                                ),
-                                                                                                                contiguous=False,
-                                                                                                            ),
-                                                                                                            View(
-                                                                                                                shape=(
-                                                                                                                    1,
-                                                                                                                    (
-                                                                                                                        1
-                                                                                                                        * 2
-                                                                                                                    ),
-                                                                                                                    (
-                                                                                                                        1
-                                                                                                                        * 2
-                                                                                                                    ),
-                                                                                                                ),
-                                                                                                                strides=(
-                                                                                                                    0,
-                                                                                                                    1,
-                                                                                                                    (
-                                                                                                                        1
-                                                                                                                        * 2
-                                                                                                                    )
-                                                                                                                    * 2,
-                                                                                                                ),
-                                                                                                                offset=0,
-                                                                                                                mask=None,
-                                                                                                                contiguous=False,
-                                                                                                            ),
-                                                                                                        )
-                                                                                                    ),
-                                                                                                    src=(),
-                                                                                                ),
-                                                                                            ),
-                                                                                        ),
-                                                                                        UOp(
-                                                                                            Ops.CONST,
-                                                                                            dtypes.int,
-                                                                                            arg=1,
-                                                                                            src=(
-                                                                                                x20 := UOp(
-                                                                                                    Ops.VIEW,
-                                                                                                    dtypes.void,
-                                                                                                    arg=ShapeTracker(
-                                                                                                        views=(
-                                                                                                            View(
-                                                                                                                shape=(
-                                                                                                                    1,
-                                                                                                                    (
-                                                                                                                        1
-                                                                                                                        * 2
-                                                                                                                    ),
-                                                                                                                    (
-                                                                                                                        1
-                                                                                                                        * 2
-                                                                                                                    ),
-                                                                                                                ),
-                                                                                                                strides=(
-                                                                                                                    0,
-                                                                                                                    0,
-                                                                                                                    0,
-                                                                                                                ),
-                                                                                                                offset=0,
-                                                                                                                mask=None,
-                                                                                                                contiguous=False,
-                                                                                                            ),
-                                                                                                        )
-                                                                                                    ),
-                                                                                                    src=(),
-                                                                                                ),
-                                                                                            ),
-                                                                                        ),
-                                                                                        UOp(
-                                                                                            Ops.CONST,
-                                                                                            dtypes.int,
-                                                                                            arg=0,
-                                                                                            src=(
-                                                                                                x20,
-                                                                                            ),
-                                                                                        ),
-                                                                                    ),
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                        UOp(
-                                                                            Ops.CONST,
-                                                                            dtypes.int,
-                                                                            arg=-1,
-                                                                            src=(
-                                                                                x23 := UOp(
-                                                                                    Ops.VIEW,
-                                                                                    dtypes.void,
-                                                                                    arg=ShapeTracker(
-                                                                                        views=(
-                                                                                            View(
-                                                                                                shape=(
-                                                                                                    1,
-                                                                                                    (
-                                                                                                        1
-                                                                                                        * 2
-                                                                                                    ),
-                                                                                                    1,
-                                                                                                ),
-                                                                                                strides=(
-                                                                                                    0,
-                                                                                                    0,
-                                                                                                    0,
-                                                                                                ),
-                                                                                                offset=0,
-                                                                                                mask=None,
-                                                                                                contiguous=False,
-                                                                                            ),
-                                                                                        )
-                                                                                    ),
-                                                                                    src=(),
-                                                                                ),
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ),
-                                                            ),
-                                                        ),
-                                                        UOp(
-                                                            Ops.CONST,
-                                                            dtypes.bool,
-                                                            arg=True,
-                                                            src=(x23,),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                ),
+        # shape=(4,5,6)
+        #  -- step1: REDUCE(axis=2) => shape=(4,5)
+        #  -- step2: RESHAPE => (4,5,1)
+        #  -- step3: EXPAND => (4,5,6)
+        #  => final shape=(4,5,6),  dimension #2 确实reduce过
+        #  这样 axis=1 还是非-reduce可以 GROUPTOP
+
+        # 1) define "main_view" for shape=(4,5,6)
+        main_view = ShapeTracker(views=(
+            View(
+                shape=(4,5,6),
+                strides=(5*6, 6, 1),
+                offset=0,
+                mask=None,
+                contiguous=True
             ),
+        ))
+
+        # (a) LOAD from global arg=1, shape=(4,5,6)
+        load_uop = UOp(
+            Ops.LOAD, dtypes.float32,
+            src=(
+                UOp(Ops.DEFINE_GLOBAL, dtypes.float32.ptr(), arg=1, src=()),
+                UOp(Ops.VIEW, dtypes.void, arg=main_view, src=())
+            )
         )
-        opts = [
-            Opt(op=OptOps.GROUPTOP, axis=1, arg=2)
-        ]
+
+        # (b) REDUCE_AXIS on axis=2 => shape = (4,5)
+        reduce_uop = UOp(
+            Ops.REDUCE_AXIS, dtypes.float32,
+            src=(load_uop,),
+            arg=(Ops.ADD, (2,))
+        )
+
+        # (c) RESHAPE => (4,5,1)
+        reshape_uop = UOp(
+            Ops.RESHAPE, dtypes.float32,
+            src=(reduce_uop,),
+            arg=(4,5,1)
+        )
+
+        # (d) EXPAND => (4,5,6)
+        expand_uop = UOp(
+            Ops.EXPAND, dtypes.float32,
+            src=(reshape_uop,),
+            arg=(4,5,6)
+        )
+
+        # (e) STORE => final shape=(4,5,6), global=0
+        store_uop = UOp(
+            Ops.STORE, dtypes.void,
+            src=(
+                UOp(Ops.DEFINE_GLOBAL, dtypes.float32.ptr(), arg=0, src=()),
+                UOp(Ops.VIEW, dtypes.void, arg=main_view, src=()),
+                expand_uop
+            )
+        )
+
+        # (f) SINK
+        ast = UOp(Ops.SINK, dtypes.void, src=(store_uop,))
+
+        # opts for test
+        opts = [Opt(op=OptOps.GROUPTOP, axis=1, arg=16)]
+
         helper_test_lin(
             Kernel(ast, opts=Device[Device.DEFAULT].renderer),
             opts=opts,
